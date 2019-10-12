@@ -159,5 +159,16 @@ def non_eff_prime_factors(n, d=2):
     print(int(n))
 
 
+
+def rsa_encrypt(message, mod, e):
+    return fast_exp(message, e, mod)
+
+
+def rsa_decrypt(message, mod, e):
+    d = phi(mod) + ext_gcd(phi(mod), e)[-1]
+    return fast_exp(message, d, mod)
+
+
+
 if __name__ == '__main__':
     unittest.main()
