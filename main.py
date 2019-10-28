@@ -128,19 +128,20 @@ def fast_exp(x, e, m, y=1):
 # ensure m > n
 def gcd(m, n):
     # clean implementation
-    # if m == 0:
-    #     return n
-    # else:
-    #     return gcd(n % m, m)
-    # printout implementation
     if m == 0:
         return n
     else:
-        print(f'gcd({m},{n%m}) = {m//(n%m)} * {n%m} + {m - (m//(n%m))*(n%m)}')
-        if m - (m//(n%m))*(n%m) == 1:
-            return 1
-        else:
-            return gcd(n % m, m)
+        return gcd(n % m, m)
+    # printout implementation
+    # if m == 0:
+    #     return n
+    # else:
+    #     # print(f'gcd({m},{n%m}) = {m//(n%m)} * {n%m} + {m - (m//(n%m))*(n%m)}')
+    #     print(f'{m} = {m//(n%m)} * {n%m} + {m - (m//(n%m))*(n%m)}')
+    #     if m - (m//(n%m))*(n%m) == 1:
+    #         return 1
+    #     else:
+    #         return gcd(n % m, m)
 
 
 # Extended Euclidean algorithm. Returns a pair of integers such that xm + yn
@@ -152,7 +153,7 @@ def ext_gcd(m, n):
     else:
         div, x, y = ext_gcd(n % m, m)
         return div, y - n // m * x, x
-    # TODO write a printout implementation for this!
+    # TODO write a printout implementation for this??
 
 
 def phi(n):
