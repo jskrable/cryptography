@@ -75,9 +75,58 @@ def primitive_root_search(m):
     return -1
 
 
+def miller_rabin(n, k, safe=False):
+    """
+    probabilistic prime checker
+    n: integer to check for primality
+    k: number of tests to perform, translates to 1 - (0.25) ** k 
+    probablity that n is prime
+    safe: if true, performs a secondary check to ensure n is a safe
+    prime
+
+    """
+
+    prime = False
+    r = 0 
+    m = 0
+    n1 = n - 1
+    while n1 % 2 == 0:
+        r += 1
+        n1 /= 2
+
+    m = (n - 1) / (2 ** r)
+
+
+    # this isn't complete, returns False sometimes still
+    def check_b():
+        b = random.randint(0, (n-1))
+        b0 = fast_exp(b, m, n)
+        if abs(b0) == 1:
+            return True
+        else:
+            for s in range(r-1):
+                b1 = fast_exp(b, (2**s), n)
+                if b1 == -1:
+                    return True
+                elif b1 == 1:
+                    return False
+            return False
+
+    for i in range(k):
+        prime = check_b()
+        if not prime:
+            break
+
+
+
+
+
 # Algorithm for solving discrete log problem given a log base and mod
 # mod must be prime for this to work???????
 def baby_step_giant_step(b, a, mod):
+    """
+    algorithm for solving discrete log problem given a log base b
+    """
 
     if not prime_check(mod):
         return -1
