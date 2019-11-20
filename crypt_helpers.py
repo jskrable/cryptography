@@ -1,64 +1,23 @@
 #!/usr/bin/env python3
 # coding: utf-8
 """
-title: main.py
+title: crypt_helpers.py
 date: 2019-09-15
 author: jskrable
 description: classwork for CS789: Cryptography
 """
 
-import unittest
 import random
 import math
 
 
-# WRITE TESTS FOR RSA
-class TestRSA(unittest.TestCase):
-
-    def test(self):
-
-        messages = [x for x in [random.randint(10000, 100000) 
-                    for x in range(1000) if prime_check(x)] if prime_check(x)]
-        mods = [random.randint(10000, 100000) for x in range(len(messages))]
-        Es = [random.randint(10000, 100000) for x in range(len(messages))]
-
-        [self.assertEqual(
-            message, 
-            (rsa_decrypt(
-                rsa_encrypt(message, mods[i], Es[i]), mods[i], Es[i])))
-            for i, message in enumerate(messages)]
-
-
-class TestFastExponentiation(unittest.TestCase):
-
-    def test(self):
-
-        Xs = [random.randint(1, 10000) for x in range(300000)]
-        Es = [random.randint(1, 300) for x in range(300000)]
-        Ms = [random.randint(1, 1000) for x in range(300000)]
-
-        [self.assertEqual(
-            fast_exp(x, Es[i], Ms[i]),
-            ((x ** Es[i]) % Ms[i])) for i, x in enumerate(Xs)]
-
-
-class TestBabyStepGiantStep(unittest.TestCase):
-
-    def test(self):
-
-        Mods = [x for x in [random.randint(1, 10000) for x in range(1000)] if prime_check(x)]
-        Bs = [random.randint(1, 10000) for x in range(len(Mods))]
-        As = [random.randint(1, 10000) for x in range(len(Mods))]
-        # Ms = [random.randint(1, 1000) for x in range(300000)]
-
-        [self.assertEqual(
-            (Bs[i] ** baby_step_giant_step(Bs[i], As[i], Mods[i])[0] % Mods[i]),
-            (As[i] % Mods[i])) for i in range(len(Bs))]
-
-
 def primitive_root_search(m):
+    """
+    searches for a primitive root
+
+    """
     
-    if not prime_check(m):
+    if not miller_rabin(m, 30):
         return -1
 
     phi_m = phi(m)
@@ -86,46 +45,42 @@ def miller_rabin(n, k, safe=False):
 
     """
 
-    prime = False
-    r = 0 
-    m = 0
-    n1 = n - 1
-    while n1 % 2 == 0:
+    # catch easy primes
+    if n == 2 or n == 3:
+        return True
+
+    # catch all even numbers
+    if n % 2 == 0:
+        return False
+
+    # initialize r and m
+    # n - 1 = 2**r * m
+    r, m = 0, n - 1
+    # continuously divide to get m and r
+    while m % 2 == 0:
         r += 1
-        n1 /= 2
-
-    m = (n - 1) / (2 ** r)
-
-
-    # this isn't complete, returns False sometimes still
-    def check_b():
-        b = random.randint(0, (n-1))
-        b0 = fast_exp(b, m, n)
-        if abs(b0) == 1:
-            return True
+        m //= 2
+    # outer loop, try k times
+    for _ in range(k):
+        a = random.randint(2, n - 1)
+        b = fast_exp(a, m, n)
+        if b == 1 or b == n - 1:
+            continue
+        for _ in range(r - 1):
+            b = fast_exp(b, 2, n)
+            if b == n - 1:
+                break
         else:
-            for s in range(r-1):
-                b1 = fast_exp(b, (2**s), n)
-                if b1 == -1:
-                    return True
-                elif b1 == 1:
-                    return False
             return False
-
-    for i in range(k):
-        prime = check_b()
-        if not prime:
-            break
+    return True
 
 
 
 
-
-# Algorithm for solving discrete log problem given a log base and mod
-# mod must be prime for this to work???????
 def baby_step_giant_step(b, a, mod):
     """
     algorithm for solving discrete log problem given a log base b
+    mod must be prime???????????
     """
 
     if not prime_check(mod):
@@ -156,8 +111,16 @@ def baby_step_giant_step(b, a, mod):
     return l
 
 
-def fast_exp(x, e, m, y=1):
-    # print(f'x = {x}  e = {e} y = {y}')
+def fast_exp(x, e, m, show=False, y=1):
+    """
+    Function allowing efficient exponentiation within a modular group.
+    X is the number to raise
+    E is the power to raise it to
+    M is the modulus
+
+    """
+    if show:
+        print(f'x = {x}  e = {e} y = {y}')
     if e == 0:
         # print('DONE')
         return y
@@ -165,37 +128,39 @@ def fast_exp(x, e, m, y=1):
         x = (x**2) % m
         e //= 2
         # print('EVEN')
-        return fast_exp(x, e, m, y)
+        return fast_exp(x, e, m, show, y)
     else:
         y = (y*x) % m
         e -= 1
         # print('ODD')
-        return fast_exp(x, e, m, y)
+        return fast_exp(x, e, m, show, y)
 
 
-# Euclidean algorithm for determining greatest common divisor
-# ensure m > n
-def gcd(m, n):
-    # clean implementation
+
+def gcd(m, n, show=False):
+    """
+    Euclidean algorithm for determining greatest common divisor
+    ensure m > n to show clean work.
+    set show to True to print out work
+    """
     if m == 0:
         return n
     else:
+        if show:
+            print(f'{m} = {m//(n%m)} * {n%m} + {m - (m//(n%m))*(n%m)}')
+            if m - (m//(n%m))*(n%m) == 1:
+                return 1
+            else:
+                return gcd(n % m, m)
         return gcd(n % m, m)
-    # printout implementation
-    # if m == 0:
-    #     return n
-    # else:
-    #     # print(f'gcd({m},{n%m}) = {m//(n%m)} * {n%m} + {m - (m//(n%m))*(n%m)}')
-    #     print(f'{m} = {m//(n%m)} * {n%m} + {m - (m//(n%m))*(n%m)}')
-    #     if m - (m//(n%m))*(n%m) == 1:
-    #         return 1
-    #     else:
-    #         return gcd(n % m, m)
 
 
-# Extended Euclidean algorithm. Returns a pair of integers such that xm + yn
-# returns the smallest possible positive integer
+
 def ext_gcd(m, n):
+    """
+    Extended Euclidean algorithm. Returns a pair of integers such that xm + yn
+    returns the smallest possible positive integer
+    """
     # clean implementation
     if m == 0:
         return n, 0, 1
@@ -290,5 +255,3 @@ def rsa_decrypt(message, mod, e):
     return fast_exp(message, d, mod)
 
 
-if __name__ == '__main__':
-    unittest.main()
