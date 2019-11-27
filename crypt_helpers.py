@@ -7,9 +7,31 @@ author: jskrable
 description: classwork for CS789: Cryptography
 """
 
+import os
 import random
 import math
+from bitstring import BitArray
 
+
+def get_primes():
+    """
+    reads file of primes numbers and returns a list.
+    use for testing.
+    """
+    with open('./primes.txt') as f:
+            data = f.read()
+            primes = [int(x) for x in data[1:-1].split(',')]
+    return primes
+
+
+def os_random(m, n):
+    """
+    returns a random int between n and m using the operating
+    system's true random function
+    """
+
+
+    return int.from_bytes(os.urandom(5), byteorder='little')
 
 def primitive_root_search(m):
     """
@@ -34,7 +56,71 @@ def primitive_root_search(m):
     return -1
 
 
-def miller_rabin(n, k, safe=False):
+def prime_search():
+    """
+    Searches for and returns a prime number. Uses the 
+    operating system's true random functions.
+    """
+    p = 0
+    while not miller_rabin(p):
+        p = int.from_bytes(os.urandom(5), byteorder='little')
+
+    return p
+
+
+def naor_reingold():
+    """
+    cryptographically secure pseudo-random number generator
+    use os.urandom() or quantumrandom for setup??
+    """
+    # true random int
+    int.from_bytes(os.urandom(5), byteorder='little')
+    # convert to binary
+    '{0:b}'.format(2)
+
+    return -1
+
+
+def blum_blum_shub(size=100):
+    """
+    cryptographically secure pseudo-random number generator
+    use os.urandom() or quantumrandom for setup??
+    MAKE THIS SMALLER, YOU DON'T NEED SO BIG
+
+    not very efficient, need to streamline.
+    use bitstring classes? functions?
+    """
+    # true random int
+    int.from_bytes(os.urandom(5), byteorder='little')
+    # convert to binary
+    '{0:b}'.format(2)
+
+    p = 0
+    q = 0
+    while p % 4 != 3:
+        p = prime_search()
+    while q % 4 != 3:
+        q = prime_search()
+    n = p * q
+    # check the seed to ensure it's 1 < seed < n
+    seed = int.from_bytes(os.urandom(5), byteorder='little')
+
+    # [i for in range(n-1) if gcd(n,i) ==1]
+    bits = ''
+    Si = seed
+    for i in range(n-1):
+        if len(bits) >= size:
+            break
+        if gcd(n,i) == 1:
+            Sj = fast_exp(Si, 2, n)
+            bits += str(Sj % 2)
+            Si = Sj 
+
+    b = BitArray(bin=bits)
+    return b.uint
+
+
+def miller_rabin(n, k=30, safe=False):
     """
     probabilistic prime checker
     n: integer to check for primality
@@ -72,6 +158,10 @@ def miller_rabin(n, k, safe=False):
                 break
         else:
             return False
+
+    # add safe in here
+
+
     return True
 
 
@@ -221,7 +311,9 @@ def non_eff_prime_factors(n, d=2):
 
 def el_gamal(p, m):
 
-    if not prime_check(p):
+    # if not prime_check(p):
+    #     return -1
+    if not miller_rabin(p,20):
         return -1
 
     # Alice
