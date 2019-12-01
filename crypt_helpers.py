@@ -10,6 +10,7 @@ description: classwork for CS789: Cryptography
 import os
 import random
 import math
+import numpy as np
 from bitstring import BitArray
 
 
@@ -24,14 +25,13 @@ def get_primes():
     return primes
 
 
-def os_random(m, n):
+def os_random(order, m=math.inf, n=0):
     """
     returns a random int between n and m using the operating
     system's true random function
     """
+    return int.from_bytes(os.urandom(order), byteorder='little')
 
-
-    return int.from_bytes(os.urandom(5), byteorder='little')
 
 def primitive_root_search(m):
     """
@@ -56,29 +56,48 @@ def primitive_root_search(m):
     return -1
 
 
-def prime_search():
+def prime_search(order=5):
     """
     Searches for and returns a prime number. Uses the 
     operating system's true random functions.
     """
     p = 0
     while not miller_rabin(p):
-        p = int.from_bytes(os.urandom(5), byteorder='little')
+        p = os_random(order)
 
     return p
 
 
-def naor_reingold():
+def naor_reingold(size=100):
     """
     cryptographically secure pseudo-random number generator
-    use os.urandom() or quantumrandom for setup??
+    
     """
-    # true random int
-    int.from_bytes(os.urandom(5), byteorder='little')
-    # convert to binary
-    '{0:b}'.format(2)
+    n = os_random(1)
+    p = prime_search()
+    q = prime_search()
+    N = p * q
+    a = [(os_random(2), os_random(2)) for i in range(n)]
 
-    return -1
+    b = os_random(3)
+    while gcd(N,b) != 1:
+        b = os_random
+    g = b ** 2 % N
+
+    r = '{0:b}'.format(os_random(600))[:2*n]
+    r = np.array(list(r), dtype=int)
+
+    bits = ''
+    for i in range(n):
+        x = [0 if os_random(1) >= 128 else 1 for i in range(n)]
+        e = np.sum(np.array([t[x[i]] for i, t in enumerate(a)]))
+        b_int = fast_exp(g,e,N)
+        b_bin = '{0:b}'.format(b_int).zfill(2*n)
+        bit = str(np.dot(r, np.array(list(b_bin), dtype=int)) % 2)
+        bits += bit
+
+    b = BitArray(bin=bits)
+    return b.uint
 
 
 def blum_blum_shub(size=100):
@@ -89,12 +108,12 @@ def blum_blum_shub(size=100):
 
     not very efficient, need to streamline.
     use bitstring classes? functions?
-    """
+    
     # true random int
     int.from_bytes(os.urandom(5), byteorder='little')
     # convert to binary
     '{0:b}'.format(2)
-
+    """
     p = 0
     q = 0
     while p % 4 != 3:
@@ -103,9 +122,9 @@ def blum_blum_shub(size=100):
         q = prime_search()
     n = p * q
     # check the seed to ensure it's 1 < seed < n
-    seed = int.from_bytes(os.urandom(5), byteorder='little')
+    seed = os_random(5)
 
-    # [i for in range(n-1) if gcd(n,i) ==1]
+    # [i for in range(n-1) if gcd(n,i) == 1]
     bits = ''
     Si = seed
     for i in range(n-1):
@@ -173,7 +192,7 @@ def baby_step_giant_step(b, a, mod):
     mod must be prime???????????
     """
 
-    if not prime_check(mod):
+    if not miller_rabin(mod, 30):
         return -1
 
     n = phi(mod)
@@ -305,45 +324,5 @@ def non_eff_prime_factors(n, d=2):
         d += 1
 
     non_eff_prime_factors(n, d)
-
     print(int(n))
-
-
-def el_gamal(p, m):
-
-    # if not prime_check(p):
-    #     return -1
-    if not miller_rabin(p,20):
-        return -1
-
-    # Alice
-    g = primitive_root_search(p)
-    x = random.randint(1,p-1)
-    h = fast_exp(g, x, p)
-
-    # Bob
-    r = random.randint(1,p-1)
-    c1 = fast_exp(g, r, p)
-    c2 = (fast_exp(h, r, p) * m) % p
-
-    # Alice
-    s = fast_exp(c1, x, p)
-    decrypted = (fast_exp(s, p-2, p) * c2) % p
-
-    return m, decrypted
-
-
-def diffie_hellman():
-
-    return -1
-
-
-def rsa_encrypt(message, mod, e):
-    return fast_exp(message, e, mod)
-
-
-def rsa_decrypt(message, mod, e):
-    d = phi(mod) + ext_gcd(phi(mod), e)[-1]
-    return fast_exp(message, d, mod)
-
 
