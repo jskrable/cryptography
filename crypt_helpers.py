@@ -36,7 +36,6 @@ def os_random(order, m=math.inf, n=0):
 def primitive_root_search(m):
     """
     searches for a primitive root
-
     """
     
     if not miller_rabin(m, 30):
@@ -280,13 +279,20 @@ def ext_gcd(m, n):
 
 
 def phi(n):
-    return len([x for x in range(1, n) if gcd(x, n) == 1])
+    if miller_rabin(n):
+        return n-1
+    else:
+        return len([x for x in range(1, n) if gcd(x, n) == 1])
 
 
 # A function to print all prime factors of
 # a given number n
 def eff_prime_factors(n):
+    """
+    function to find a set of all prime factors for any 
+    given n. takes in an integer, returns a set.
 
+    """
     factors = set()
 
     while n % 2 == 0:
@@ -325,4 +331,28 @@ def non_eff_prime_factors(n, d=2):
 
     non_eff_prime_factors(n, d)
     print(int(n))
+
+
+# def pollards_rho(n):
+
+#     if miller_rabin(n, 30):
+#         raise Exception('n is prime you fool.')
+
+#     x = 2
+#     y = x**2 -1 
+#     g = gcd((x-y), n)
+
+#     if g == 1:
+#         # choose new x
+#         break
+
+#     elif 1 < g < n:
+#         if miller_rabin(g, 30):
+#             return g
+#         else:
+#             pollards_rho(g)
+
+#     else:
+#         x = x**2 + 1 % n
+#         y = (y**2 + 1)**2 + 1 % n
 
