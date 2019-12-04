@@ -55,14 +55,17 @@ def primitive_root_search(m):
     return -1
 
 
-def prime_search(order=5):
+def prime_search(order=5, true_random=False):
     """
     Searches for and returns a prime number. Uses the 
     operating system's true random functions.
     """
     p = 0
     while not miller_rabin(p):
-        p = os_random(order)
+        if true_random:
+            p = blum_blum_shub(order)
+        else:
+            p = os_random(order)
 
     return p
 
@@ -121,21 +124,29 @@ def blum_blum_shub(size=100):
         q = prime_search()
     n = p * q
     # check the seed to ensure it's 1 < seed < n
-    seed = os_random(5)
+    seed = os_random(5) % n
 
     # [i for in range(n-1) if gcd(n,i) == 1]
     bits = ''
+    # using the generally agreed upon bit to digit ratio
+    limit = math.floor(size * math.log(10, 2))
     Si = seed
     for i in range(n-1):
-        if len(bits) >= size:
+        if len(bits) >= limit:
             break
         if gcd(n,i) == 1:
             Sj = fast_exp(Si, 2, n)
             bits += str(Sj % 2)
             Si = Sj 
 
-    b = BitArray(bin=bits)
-    return b.uint
+    b = BitArray(bin=bits).uint
+    digits = len(str(b))
+    if digits < size:
+        diff = size - digits
+        b = int(''.join(['1'for i in range(diff)]) + str(b))
+    elif digits > size:
+        b = int(str(b)[:size])
+    return b
 
 
 def miller_rabin(n, k=30, safe=False):
@@ -242,6 +253,26 @@ def fast_exp(x, e, m, show=False, y=1):
         e -= 1
         # print('ODD')
         return fast_exp(x, e, m, show, y)
+
+
+def exp(x, e, m, y=1):
+    """
+    Function allowing efficient exponentiation within a modular group.
+    X is the number to raise
+    E is the power to raise it to
+    M is the modulus
+
+    """
+    if e == 0:
+        return y
+    elif (e % 2 == 0):
+        x = (x**2) % m
+        e //= 2
+        return exp(x, e, m, y)
+    else:
+        y = (y*x) % m
+        e -= 1
+        return exp(x, e, m, y)
 
 
 
