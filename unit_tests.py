@@ -115,25 +115,6 @@ class TestCiphers(unittest.TestCase):
             self.assertEqual(message, cracked)
 
 
-
-# class TestBabyStepGiantStep(unittest.TestCase):
-
-#     def test(self):
-
-#         with open('./primes.txt') as f:
-#             data = f.read()
-#             primes = [int(x) for x in data[1:-1].split(',')]
-
-#         Mods = primes
-#         Bs = [random.randint(1, 10000) for x in range(len(Mods))]
-#         As = [random.randint(1, 10000) for x in range(len(Mods))]
-#         # Ms = [random.randint(1, 1000) for x in range(300000)]
-
-#         [self.assertEqual(
-#             (Bs[i] ** cp.baby_step_giant_step(Bs[i], As[i], Mods[i])[0] % Mods[i]),
-#             (As[i] % Mods[i])) for i in range(len(Bs))]
-
-
 if __name__ == '__main__':
 
     unittest.main()
