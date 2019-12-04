@@ -13,21 +13,19 @@ from timeit import default_timer as timer
 
 class RSA:
 
-    def __init__(self):
+    def __init__(self, size=10):
         # make these strong primes???
         # use blum blum shub here!!!!
-        self.__p = cp.prime_search(10, True)
-        self.__q = cp.prime_search(10, True)
+        self.__p = cp.prime_search(size, True)
+        self.__q = cp.prime_search(size, True)
         if not (cp.miller_rabin(self.__p) or cp.miller_rabin(self.q)):
             raise Exception('P or Q is not prime. Cannot safely encrypt. Please try again.')
             return -1
         self.n = self.__p * self.__q
         self.__phi = ((self.__p - 1) * (self.__q - 1) )
-        self.phi = self.__phi
-        # must be coprime to n?
-        e = cp.blum_blum_shub(10)
+        e = cp.blum_blum_shub(size)
         while cp.gcd(self.__phi, e) != 1:
-            e = cp.blum_blum_shub(10) % self.__phi
+            e = cp.blum_blum_shub(size)
         self.e = e
 
 
@@ -58,17 +56,39 @@ class RSA:
         get p and 1 by factoring n, calculate phi using that, get 
         d using that.
         """
+
+        def pollards_rho(n):
+
+            if miller_rabin(n, 30):
+                raise Exception('n is prime you fool.')
+
+            x = 2
+            y = x**2 -1 
+            g = gcd((x-y), n)
+
+            if g == 1:
+                # choose new x
+                None
+
+            elif 1 < g < n:
+                if miller_rabin(g, 30):
+                    return g
+                else:
+                    pollards_rho(g)
+
+            else:
+                x = x**2 + 1 % n
+                y = (y**2 + 1)**2 + 1 % n
         return -1
 
 
 class ElGamal:
 
     def __init__(self, size=10):
-        self.mod = cp.prime_search(10, True)
+        self.mod = cp.prime_search(size, True)
         if not cp.miller_rabin(self.mod, 30):
             raise Exception('Modulus is not prime. Cannot safely encrypt. Please provide a prime modulus at class initialization.')
             return -1
-        self.mod = mod
         self.base = cp.primitive_root_search(self.mod)
         self.__key_A = cp.blum_blum_shub(20) % self.mod
         self.key_pub = cp.fast_exp(self.base, self.__key_A, self.mod)
@@ -151,14 +171,16 @@ class ElGamal:
         """ 
         Quick function to test the correctness of the cipher implementation
         """
-        print('Modulus: {}'.format(self.mod))
-        print('Message: {}'.format(message))
+        print('Modulus    : {}'.format(self.mod))
+        print('Base       : {}'.format(self.base))
+        print('Message    : {}'.format(message))
         c1, c2 = self.encrypt(message)
-        print('Encrypted: {}, {}'.format(c1, c2))
+        print('Key        : {}'.format(c1))
+        print('Encrypted  : {}'.format(c2))
         decrypted = self.decrypt(c1, c2)
-        print('Decrypted: {}'.format(decrypted))
+        print('Decrypted  : {}'.format(decrypted))
         t1 = timer()
         cracked = self.crack(c1, c2)
         t2 = timer()
-        print('Cracked: {}'.format(cracked))
-        print('Time to crack: {} seconds'.format(t2-t1))
+        print('Cracked    : {}'.format(cracked))
+        print('Crack time : {} seconds'.format(t2-t1))

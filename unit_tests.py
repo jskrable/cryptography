@@ -10,69 +10,94 @@ description: classwork for CS789: Cryptography
 import unittest
 import random
 import math
-import sys
 import ciphers
 import crypt_helpers as cp
 
+global SIZE
+SIZE = 100
+
+class TestCryptHelpers(unittest.TestCase):
+    """
+    Unit tests for the functions in crypt_helpers.py.
+
+    TODO:
+    - write for primitive root search
+    - write for extended euclidean
+    - write for efficient prime factors
 
 
-# Progress bar for cli
-def progress(count, total, suffix=''):
-    bar_len = 60
-    filled_len = int(round(bar_len * count / float(total)))
-    percents = round(100.0 * count / float(total), 1)
-    bar = '#' * filled_len + '-' * (bar_len - filled_len)
-    sys.stdout.write('[%s] %s%s %s\r' % (bar, percents, '%', suffix))
-    sys.stdout.flush()
+    """
+    def test_Euclidean(self):
+        with open('./primes.txt') as f:
+            data = f.read()
+            primes = [int(x) for x in data[1:-1].split(',')]
+
+        p_len = len(primes)
+        for p in primes:
+            for q in primes:
+                if p != q:
+                    self.assertEqual(1, cp.gcd(p,q))
 
 
-class testMillerRabin(unittest.TestCase):
+    # def test_PrimeSearch(self):
+    #     for i in range(SIZE):
+    #         # switch = True if random.random() >= 0.5 else False
+    #         order = random.randint(1,3)
+    #         p = cp.prime_search(order, True)
+    #         self.assertEqual(True, cp.miller_rabin(p))
 
-    def test(self):
-        print('\nStarting Miller-Rabin tests...')
+
+    def test_FastExponentiation(self):
+
+        Xs = [random.randint(1, 10000) for x in range(SIZE)]
+        Es = [random.randint(1, 300) for x in range(SIZE)]
+        Ms = [random.randint(1, 1000) for x in range(SIZE)]
+
+        [self.assertEqual(
+            cp.fast_exp(x, Es[i], Ms[i]),
+            ((x ** Es[i]) % Ms[i])) for i, x in enumerate(Xs)]
+
+
+    def test_MillerRabin(self):
         with open('./primes.txt') as f:
             data = f.read()
             primes = [int(x) for x in data[1:-1].split(',')]
 
         for i, p in enumerate(primes):
-            progress(i+1, len(primes), 'of Miller-Rabin tests complete')
             self.assertEqual(True, cp.miller_rabin(p))
 
 
-class TestBlumBlumShub(unittest.TestCase):
-
-    def test(self):
-        print('\nStarting Blum-Blum-Shub tests...')
+    def test_BlumBlumShub(self):
         for i in range(SIZE):
-            progress(i+1, SIZE, 'of Blum-Blum-Shub tests complete')
             s = random.randint(1,25)
             n = len(str(cp.blum_blum_shub(s)))
             self.assertEqual(s,n)
 
 
-class TestRSA(unittest.TestCase):
+    # def test_NaorReingold(self):
+    #     for i in range(SIZE):
+    #         s = random.randint(1,25)
+    #         n = len(str(cp.naor_reingold(s)))
+    #         self.assertEqual(s,n)
 
-    def test(self):
-        print('\nStarting RSA tests...')
+
+class TestCiphers(unittest.TestCase):
+
+    def test_RSA(self):
         for i in range(SIZE):
-            progress(i+1, SIZE, 'of RSA tests complete')
             r = ciphers.RSA()
             message = 123456
             self.assertEqual(message, r.decrypt(r.encrypt(message)))
 
 
+    def test_ElGamal(self):
+        for i in range(SIZE):
+            g = ciphers.ElGamal()
+            message = 123456
+            c1, c2 = g.encrypt(message)
+            decrypted = g.decrypt(c1, c2)
+            self.assertEqual(message, decrypted)
 
-# class TestFastExponentiation(unittest.TestCase):
-
-#     def test(self):
-
-#         Xs = [random.randint(1, 10000) for x in range(300000)]
-#         Es = [random.randint(1, 300) for x in range(300000)]
-#         Ms = [random.randint(1, 1000) for x in range(300000)]
-
-#         [self.assertEqual(
-#             cp.fast_exp(x, Es[i], Ms[i]),
-#             ((x ** Es[i]) % Ms[i])) for i, x in enumerate(Xs)]
 
 
 # class TestBabyStepGiantStep(unittest.TestCase):
@@ -94,6 +119,5 @@ class TestRSA(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    global SIZE
-    SIZE = 100
+
     unittest.main()

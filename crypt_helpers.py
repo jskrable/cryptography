@@ -55,7 +55,7 @@ def primitive_root_search(m):
     return -1
 
 
-def prime_search(order=5, true_random=False):
+def prime_search(order=5, true_random=False, safe=False):
     """
     Searches for and returns a prime number. Uses the 
     operating system's true random functions.
@@ -66,11 +66,12 @@ def prime_search(order=5, true_random=False):
             p = blum_blum_shub(order)
         else:
             p = os_random(order)
-
+    if safe:
+        p = 2 * p + 1
     return p
 
 
-def naor_reingold(size=100):
+def naor_reingold(size=10):
     """
     cryptographically secure pseudo-random number generator
     
@@ -89,6 +90,8 @@ def naor_reingold(size=100):
     r = '{0:b}'.format(os_random(600))[:2*n]
     r = np.array(list(r), dtype=int)
 
+    # using the generally agreed upon bit to digit ratio
+    limit = math.floor(size * math.log(10, 2))
     bits = ''
     for i in range(n):
         x = [0 if os_random(1) >= 128 else 1 for i in range(n)]
@@ -97,12 +100,21 @@ def naor_reingold(size=100):
         b_bin = '{0:b}'.format(b_int).zfill(2*n)
         bit = str(np.dot(r, np.array(list(b_bin), dtype=int)) % 2)
         bits += bit
+        if len(bits) >= limit:
+            break
 
-    b = BitArray(bin=bits)
-    return b.uint
+    # ensure digits match the size argument
+    b = BitArray(bin=bits).uint
+    digits = len(str(b))
+    if digits < size:
+        diff = size - digits
+        b = int(''.join(['1'for i in range(diff)]) + str(b))
+    elif digits > size:
+        b = int(str(b)[:size])
+    return b
 
 
-def blum_blum_shub(size=100):
+def blum_blum_shub(size=10):
     """
     cryptographically secure pseudo-random number generator
     use os.urandom() or quantumrandom for setup??
@@ -139,6 +151,7 @@ def blum_blum_shub(size=100):
             bits += str(Sj % 2)
             Si = Sj 
 
+    # ensure digits match the size argument
     b = BitArray(bin=bits).uint
     digits = len(str(b))
     if digits < size:
