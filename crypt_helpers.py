@@ -207,40 +207,24 @@ def miller_rabin(n, k=30, safe=False):
     return True
 
 
-
-
-def baby_step_giant_step(b, a, mod):
+def baby_step_giant_step(a, b, mod):
     """
-    algorithm for solving discrete log problem given a log base b
-    mod must be prime???????????
+    solves discrete log problem given an answer a, log base b, and
+    modular group mod.
     """
-
-    if not miller_rabin(mod, 30):
-        return -1
-
     n = phi(mod)
     m = math.ceil((n**0.5) % mod)
-
-    # more efficient to store in dict
-    # j = [(j, (b**j) % mod) for j in range(0,m)]
-    j = {j: (b**j) % mod for j in range(0, m)}
-
-    # c = (b**-1)**m = b**(phi(mod)-1)**m
+    # baby step, more efficient to store in dict
+    j = {fast_exp(b, j, mod) : j for j in range(m)}
+    # fermat's little theorem, c = (b**-1)**m = b**(phi(mod)-1)**m
     c = fast_exp(fast_exp(b, (n - 1), mod), m, mod)
-    # print(c)
-
-    i = {i: (a * (c ** i)) % mod for i in range(0, m)}
-    # print(j)
-    # print(i)
-    shared = [(x, y) for x, vi in i.items() for y, vj in j.items() if vi == vj]
-    # print(shared)
-    l = [((i * m) + j) % n for i, j in shared]
-
-    # check
-    # print('GOOD') if b ** l[0] % mod == a
-    # print(l)
-
-    return l
+    # giant step, similar to j, but break and return if a match is found
+    for i in range(m):
+        y = (a * fast_exp(c, i, mod)) % mod
+        if y in j:
+            return (i * m) + j[y] % n
+    # failure if no overlap found
+    return None
 
 
 def fast_exp(x, e, m, show=False, y=1):

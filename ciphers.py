@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # coding: utf-8
 """
-title: crypt_helpers.py
+title: ciphers.py
 date: 2019-12-01
 author: jskrable
 description: cipher classes for RSA and El Gamal
@@ -138,28 +138,9 @@ class ElGamal:
         private key_A attribute Alice saved earlier.
         """
 
-        def baby_step_giant_step(a, b, mod):
-            """
-            solves discrete log problem given an answer a, log base b, and
-            modular group mod.
-            """
-            n = cp.phi(mod)
-            m = math.ceil((n**0.5) % mod)
-            # baby step, more efficient to store in dict
-            j = {cp.fast_exp(b, j, mod) : j for j in range(m)}
-            # fermat's little theorem, c = (b**-1)**m = b**(phi(mod)-1)**m
-            c = cp.fast_exp(cp.fast_exp(b, (n - 1), mod), m, mod)
-            # giant step, similar to j, but break and return if a match is found
-            for i in range(m):
-                y = (a * cp.fast_exp(c, i, mod)) % mod
-                if y in j:
-                    return (i * m) + j[y] % n
-            # failure if no overlap found
-            return None
-
         # get Alice's private key by solving discrete log problem
         # runtime increases exponentially with larger keys
-        key_A = baby_step_giant_step(self.key_pub, self.base, self.mod)
+        key_A = cp.baby_step_giant_step(self.key_pub, self.base, self.mod)
         # solve for the decryption key with the cracked private key
         s = cp.fast_exp(c1, key_A, self.mod)
         # decrypt the message
