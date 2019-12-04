@@ -24,9 +24,9 @@ class TestCryptHelpers(unittest.TestCase):
     - write for primitive root search
     - write for extended euclidean
     - write for efficient prime factors
-
-
     """
+
+    
     def test_Euclidean(self):
         with open('./primes.txt') as f:
             data = f.read()
