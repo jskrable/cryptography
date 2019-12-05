@@ -14,7 +14,7 @@ import ciphers
 import crypt_helpers as cp
 
 global SIZE
-SIZE = 10
+SIZE = 100
 
 class TestCryptHelpers(unittest.TestCase):
     """
@@ -81,6 +81,8 @@ class TestCryptHelpers(unittest.TestCase):
     #         self.assertEqual(s,n)
 
 
+class TestBreakers(unittest.TestCase):
+
 
     def test_BabyStepGiantStep(self):
         for i in range(SIZE):
@@ -92,16 +94,24 @@ class TestCryptHelpers(unittest.TestCase):
             self.assertEqual(a, answer)
 
 
+    def test_PollardsRho(self):
+        for i in range(SIZE):
+            p = cp.prime_search(5, True)
+            q = cp.prime_search(5, True)
+            n = p * q
+            factor = cp.pollards_rho(n)
+            self.assertEqual(True, factor in [p,q])            
+
 
 class TestCiphers(unittest.TestCase):
 
+
     def test_RSA(self):
         for i in range(SIZE):
-            r = ciphers.RSA(5)
+            r = ciphers.RSA(6)
             message = cp.blum_blum_shub(6)
             self.assertEqual(message, r.decrypt(r.encrypt(message)))
             self.assertEqual(message, r.crack(r.encrypt(message)))
-
 
 
     def test_ElGamal(self):

@@ -28,25 +28,36 @@ class RSA:
         self.e = e
 
 
-    def encrypt(self, message):
+    def encrypt(self, message, key=None):
         """
         function to encrypt a message, given a public key made up of
         a modulus and an exponent. raises the message to the exponent
         in modular group and returns the encrypted message.
+
+        Can accept an external key as a tuple of (e, n), otherwise uses
+        the key creted at initialization.
         """
+        # if type(message) is str:
+        #     message = cp.str_to_int(message)
+        e, n = self.e, self.n if not key else key
+        if message > n:
+            raise Exception('Message larger than modular group. Cannot safely encrypt. Please provide larger size at class initialization.')
+            return -1, -1
         return cp.fast_exp(message, self.e, self.n)
 
 
-    def decrypt(self, message):
+    def decrypt(self, message, decode=False):
         """
         function to decrypt a message encrypted using RSA, given a public
         key made up of a modulus and an exponent. calculates the decryption
         exponent using the extended euclidean algorithm and exponentiates 
         to solve the decryption.
         """
-        # d = cp.phi(self.mod) + cp.ext_gcd(cp.phi(self.mod), self.e)[-1]
         d = self.__phi + cp.ext_gcd(self.__phi, self.e)[-1]
-        return cp.fast_exp(message, d, self.n)
+        decrypted = cp.fast_exp(message, d, self.n)
+        # if decode:
+        #     decrypted = cp.int_to_str(decrypted)
+        return decrypted
 
 
     def crack(self, message):
@@ -85,30 +96,38 @@ class ElGamal:
     def __init__(self, size=10):
         self.mod = cp.prime_search(size, True)
         if not cp.miller_rabin(self.mod, 30):
-            raise Exception('Modulus is not prime. Cannot safely encrypt. Please provide a prime modulus at class initialization.')
+            raise Exception('Modulus is not prime. Cannot safely encrypt.')
             return -1
         self.base = cp.primitive_root_search(self.mod)
         self.__key_A = cp.blum_blum_shub(20) % self.mod
         self.key_pub = cp.fast_exp(self.base, self.__key_A, self.mod)
 
 
-    def encrypt(self, message):
+    def encrypt(self, message, mod=None, base=None, key=None):
         """
         function to encrypt a message, given the mututally agreed modulus,
         the mutual base, and the public key transmitted by alice during cipher 
         initialization. returns another public key (Bob's), c1, and the encrypted
         message, c2.
+
+        Accepts an external key. Requires mod, base, and key. If not provided, uses
+        the mod, base, and key created at initialization.
         """
-        if message > self.mod:
-            raise Exception('Message larger than modular group. Cannot safely encrypt. Please provide larger modulus at class initialization.')
+        # if type(message) is str:
+        #     message = cp.str_to_int(message)
+        mod = self.mod if not mod else mod
+        base = self.base if not base else base
+        key = self.key_pub if not key else key
+        if message > mod:
+            raise Exception('Message larger than modular group. Cannot safely encrypt. Please provide larger size at class initialization.')
             return -1, -1
-        key_B = cp.blum_blum_shub(20) % self.mod
-        c1 = cp.fast_exp(self.base, key_B, self.mod)
-        c2 = (cp.fast_exp(self.key_pub, key_B, self.mod) * message) % self.mod
+        key_B = cp.blum_blum_shub(20) % mod
+        c1 = cp.fast_exp(base, key_B, mod)
+        c2 = (cp.fast_exp(key, key_B, mod) * message) % mod
         return c1, c2
 
 
-    def decrypt(self, key, message):
+    def decrypt(self, key, message, decode=False):
         """
         function to decrypt a message encrypted using el gamal, given the
         publically transmitted key from Bob, the encrypted message from Bob,
@@ -116,6 +135,8 @@ class ElGamal:
         """
         s = cp.fast_exp(key, self.__key_A, self.mod)
         decrypted = (cp.fast_exp(s, self.mod-2, self.mod) * message) % self.mod
+        # if decode:
+        #     decrypted = cp.int_to_str(decrypted)
         return decrypted
 
 

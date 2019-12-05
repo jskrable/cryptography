@@ -10,6 +10,7 @@ description: classwork for CS789: Cryptography
 import os
 import random
 import math
+import hashlib
 import numpy as np
 from bitstring import BitArray
 
@@ -74,7 +75,6 @@ def prime_search(order=5, true_random=False, safe=False):
 def naor_reingold(size=10):
     """
     cryptographically secure pseudo-random number generator
-    
     """
     n = os_random(1)
     p = prime_search()
@@ -117,16 +117,7 @@ def naor_reingold(size=10):
 def blum_blum_shub(size=10):
     """
     cryptographically secure pseudo-random number generator
-    use os.urandom() or quantumrandom for setup??
-    MAKE THIS SMALLER, YOU DON'T NEED SO BIG
-
-    not very efficient, need to streamline.
-    use bitstring classes? functions?
-    
-    # true random int
-    int.from_bytes(os.urandom(5), byteorder='little')
-    # convert to binary
-    '{0:b}'.format(2)
+    size is the number of digits in the generated integer
     """
     p = 0
     q = 0
@@ -135,14 +126,11 @@ def blum_blum_shub(size=10):
     while q % 4 != 3:
         q = prime_search()
     n = p * q
-    # check the seed to ensure it's 1 < seed < n
     seed = os_random(5) % n
-
-    # [i for in range(n-1) if gcd(n,i) == 1]
-    bits = ''
     # using the generally agreed upon bit to digit ratio
     limit = math.floor(size * math.log(10, 2))
     Si = seed
+    bits = ''
     for i in range(n-1):
         if len(bits) >= limit:
             break
@@ -313,8 +301,7 @@ def phi(n):
         return len([x for x in range(1, n) if gcd(x, n) == 1])
 
 
-# A function to print all prime factors of
-# a given number n
+
 def eff_prime_factors(n):
     """
     function to find a set of all prime factors for any 
@@ -338,30 +325,30 @@ def eff_prime_factors(n):
     return factors
 
 
-def prime_check(n, d=2):
+# def prime_check(n, d=2):
 
-    while d < int(n**0.5)+1:
-        if n % d == 0:
-            return False
-            n = n / d
-        d += 1
+#     while d < int(n**0.5)+1:
+#         if n % d == 0:
+#             return False
+#             n = n / d
+#         d += 1
 
-    return True
-
-
-# Non-efficient algorithm to find prime factors of n
-def non_eff_prime_factors(n, d=2):
-
-    while d < int(n**0.5):
-        if n % d == 0:
-            n = n / d
-        d += 1
-
-    non_eff_prime_factors(n, d)
-    print(int(n))
+#     return True
 
 
-def pollards_rho(n, x=2, limit=10):
+# # Non-efficient algorithm to find prime factors of n
+# def non_eff_prime_factors(n, d=2):
+
+#     while d < int(n**0.5):
+#         if n % d == 0:
+#             n = n / d
+#         d += 1
+
+#     non_eff_prime_factors(n, d)
+#     print(int(n))
+
+
+def pollards_rho(n, x=2, limit=5):
     """
     hitting recursion limit, refactor to 2 loops?
     prime init is helping...
@@ -370,33 +357,30 @@ def pollards_rho(n, x=2, limit=10):
     if miller_rabin(n, 30):
         raise Exception('n is prime you fool.')
 
-    f = lambda x: x**2 + 1 % n
-    init = x
+    c = 1
     g = 1
     count = 1
+    f = lambda x: x**2 + c % n
     while (g == 1):
+        # tortoise
         x = f(x)
+        # hare
         y = f(f(x))
         g = gcd(abs(x-y), n)
         count += 1
         if (g == n) or (count >= limit):
-            init += 1
-            while not miller_rabin(init):
-                init += 1
-            x = init
+            x = random.randint(2, n-2)
+            c = random.randint(2, n-1)
             y = x
             count = 1
-        if init >= n:
-            return -1
     return g
 
 
-    # if (g == n) or (count >= limit):
-    #     init += 1
-    #     while not miller_rabin(init):
-    #         init += 1
-    #     print('round {}'.format(init))
-    #     return pollards_rho(n, init)
-    # else:
-    #     return g
+# def str_to_int(message):
+#     """
+#     """
+#     return int(message.encode().hex(), 16)
 
+
+# def int_to_str(message):
+#     return bytearray.fromhex(hex(message)[2:])
