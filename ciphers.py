@@ -14,15 +14,14 @@ from timeit import default_timer as timer
 class RSA:
 
     def __init__(self, size=10):
-        # make these strong primes???
-        # use blum blum shub here!!!!
+        # make these strong primes!!!!s
         self.__p = cp.prime_search(size, True)
         self.__q = cp.prime_search(size, True)
         if not (cp.miller_rabin(self.__p) or cp.miller_rabin(self.q)):
             raise Exception('P or Q is not prime. Cannot safely encrypt. Please try again.')
             return -1
         self.n = self.__p * self.__q
-        self.__phi = ((self.__p - 1) * (self.__q - 1) )
+        self.__phi = ((self.__p - 1) * (self.__q - 1))
         e = cp.blum_blum_shub(size)
         while cp.gcd(self.__phi, e) != 1:
             e = cp.blum_blum_shub(size)
@@ -53,33 +52,32 @@ class RSA:
     def crack(self, message):
         """
         function to crack RSA encryption using pollard's rho??
-        get p and 1 by factoring n, calculate phi using that, get 
+        get p and q by factoring n, calculate phi using that, get 
         d using that.
         """
+        p = cp.pollards_rho(self.n)
+        q = self.n // p
+        phi = (p-1) * (q-1)
+        d = phi + cp.ext_gcd(phi, self.e)[-1]
+        return cp.fast_exp(message, d, self.n)
 
-        def pollards_rho(n):
 
-            if miller_rabin(n, 30):
-                raise Exception('n is prime you fool.')
-
-            x = 2
-            y = x**2 -1 
-            g = gcd((x-y), n)
-
-            if g == 1:
-                # choose new x
-                None
-
-            elif 1 < g < n:
-                if miller_rabin(g, 30):
-                    return g
-                else:
-                    pollards_rho(g)
-
-            else:
-                x = x**2 + 1 % n
-                y = (y**2 + 1)**2 + 1 % n
-        return -1
+    def test(self, message):
+        """ 
+        Quick function to test the correctness of the cipher implementation
+        """
+        print('Modulus    : {}'.format(self.n))
+        print('Exponent   : {}'.format(self.e))
+        print('Message    : {}'.format(message))
+        encrypted = self.encrypt(message)
+        print('Encrypted  : {}'.format(encrypted))
+        decrypted = self.decrypt(encrypted)
+        print('Decrypted  : {}'.format(decrypted))
+        t1 = timer()
+        cracked = self.crack(encrypted)
+        t2 = timer()
+        print('Cracked    : {}'.format(cracked))
+        print('Crack time : {} seconds'.format(t2-t1))
 
 
 class ElGamal:

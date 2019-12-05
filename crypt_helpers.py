@@ -361,26 +361,31 @@ def non_eff_prime_factors(n, d=2):
     print(int(n))
 
 
-# def pollards_rho(n):
+def pollards_rho(n, x=2, limit=10):
+    """
+    hitting recursion limit, refactor to 2 loops?
+    prime init is helping...
+    """
 
-#     if miller_rabin(n, 30):
-#         raise Exception('n is prime you fool.')
+    if miller_rabin(n, 30):
+        raise Exception('n is prime you fool.')
 
-#     x = 2
-#     y = x**2 -1 
-#     g = gcd((x-y), n)
+    init = x
+    f = lambda x: x**2 + 1 % n
+    g = 1
+    count = 1
+    while (g == 1) and (count < limit):
+        x = f(x)
+        y = f(f(x))
+        g = gcd(abs(x-y), n)
+        count += 1
 
-#     if g == 1:
-#         # choose new x
-#         break
-
-#     elif 1 < g < n:
-#         if miller_rabin(g, 30):
-#             return g
-#         else:
-#             pollards_rho(g)
-
-#     else:
-#         x = x**2 + 1 % n
-#         y = (y**2 + 1)**2 + 1 % n
+    if (g == n) or (count >= limit):
+        init += 1
+        while not miller_rabin(init):
+            init += 1
+        print('round {}'.format(init))
+        return pollards_rho(n, init)
+    else:
+        return g
 
