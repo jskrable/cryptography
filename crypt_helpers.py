@@ -370,22 +370,33 @@ def pollards_rho(n, x=2, limit=10):
     if miller_rabin(n, 30):
         raise Exception('n is prime you fool.')
 
-    init = x
     f = lambda x: x**2 + 1 % n
+    init = x
     g = 1
     count = 1
-    while (g == 1) and (count < limit):
+    while (g == 1):
         x = f(x)
         y = f(f(x))
         g = gcd(abs(x-y), n)
         count += 1
-
-    if (g == n) or (count >= limit):
-        init += 1
-        while not miller_rabin(init):
+        if (g == n) or (count >= limit):
             init += 1
-        print('round {}'.format(init))
-        return pollards_rho(n, init)
-    else:
-        return g
+            while not miller_rabin(init):
+                init += 1
+            x = init
+            y = x
+            count = 1
+        if init >= n:
+            return -1
+    return g
+
+
+    # if (g == n) or (count >= limit):
+    #     init += 1
+    #     while not miller_rabin(init):
+    #         init += 1
+    #     print('round {}'.format(init))
+    #     return pollards_rho(n, init)
+    # else:
+    #     return g
 
