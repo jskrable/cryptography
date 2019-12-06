@@ -4,17 +4,18 @@
 title: unit_tests.py
 date: 2019-11-19
 author: jskrable
-description: classwork for CS789: Cryptography
+description: unit testing for ciphers.py and crypt_helpers.py
 """
 
-import unittest
-import random
 import math
+import random
+import unittest
+import argparse
 import ciphers
 import crypt_helpers as cp
 
 global SIZE
-SIZE = 100
+# SIZE = 100
 
 class TestCryptHelpers(unittest.TestCase):
     """
@@ -125,6 +126,48 @@ class TestCiphers(unittest.TestCase):
             self.assertEqual(message, cracked)
 
 
+def arg_parser():
+    """
+    function to parse arguments sent to terminal. descriptions below.
+    call [script] -h to show help.
+    """
+    parser = argparse.ArgumentParser(
+        description='unit testing for ciphers.py and crypt_helpers.py')
+    parser.add_argument('-s', '--size', default=50, type=int, nargs='?',
+                        help='the number of test loops to run for each suite, default 50')
+    parser.add_argument('-a', '--all', default=True, type=bool, nargs='?',
+                        help='runs all test suites, default True')
+    parser.add_argument('-b', '--breakers', default=False, type=bool, nargs='?',
+                        help='runs just the breaker suite, default False')
+    parser.add_argument('-c', '--ciphers', default=False, type=bool, nargs='?',
+                        help='runs just the cipher suite, including RSA and ElGamal, default False')
+    parser.add_argument('-u', '--utilities', default=False, type=bool, nargs='?',
+                        help='runs just the cryptographic helper function suite, default False')
+    args = parser.parse_args()
+    return args
+
+
 if __name__ == '__main__':
 
-    unittest.main()
+    args = arg_parser()
+    SIZE = args.size
+    tests = []
+    if args.breakers:
+        tests = unittest.TestLoader().loadTestsFromTestCase(TestBreakers)
+        print('\nCipher-breaking tests selected')
+    elif args.ciphers:
+        tests = unittest.TestLoader().loadTestsFromTestCase(TestCiphers)
+        print('\nEnd-to-end cipher tests selected')
+    elif args.utilities:
+        tests = unittest.TestLoader().loadTestsFromTestCase(TestCryptHelpers)
+        print('\nCryptographic utility function tests selected')
+    else:
+        ch_suite = unittest.TestLoader().loadTestsFromTestCase(TestCryptHelpers)
+        c_suite = unittest.TestLoader().loadTestsFromTestCase(TestCiphers)
+        b_suite = unittest.TestLoader().loadTestsFromTestCase(TestBreakers)
+        tests = unittest.TestSuite([ch_suite, c_suite, b_suite])
+        print('\nAll test suites selected')
+
+    print('Starting unit tests...')
+    print('\n----------------------------------------------------------------------\n')
+    unittest.TextTestRunner(verbosity=2).run(tests)

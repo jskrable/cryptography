@@ -4,7 +4,7 @@
 title: crypt_helpers.py
 date: 2019-09-15
 author: jskrable
-description: classwork for CS789: Cryptography
+description: cryptographic helper functions
 """
 
 import os
