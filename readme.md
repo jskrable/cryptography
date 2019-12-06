@@ -10,7 +10,7 @@ For RSA, [Pollard's Rho](https://en.wikipedia.org/wiki/Pollard%27s_rho_algorithm
 
 All utilities and helper functions can be found in crypt_helpers.py
 
-Execute unit_tests.py script to run unit tests:
+Execute unit_tests.py script to run unit tests (`python unit_tests.py`). Arguments are detailed below, and can also be accessed by appending `-h` to the script command.
 
 ```
 $ ./unit_tests.py -h
