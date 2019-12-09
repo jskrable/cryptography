@@ -19,12 +19,18 @@ class RSA:
         if not (cp.miller_rabin(self.__p) or cp.miller_rabin(self.q)):
             raise Exception('P or Q is not prime. Cannot safely encrypt. Please try again.')
             return -1
-        self.n = self.__p * self.__q
         self.__phi = ((self.__p - 1) * (self.__q - 1))
-        e = cp.blum_blum_shub(size)
-        while cp.gcd(self.__phi, e) != 1:
+        if not n:
+            self.n = self.__p * self.__q
+        else:
+            self.n = n
+        if not e:
             e = cp.blum_blum_shub(size)
-        self.e = e
+            while cp.gcd(self.__phi, e) != 1:
+                e = cp.blum_blum_shub(size)
+            self.e = e
+        else: 
+            self.e = e
 
 
     def encrypt(self, message, n=None, e=None):
