@@ -10,7 +10,7 @@ For RSA, [Pollard's Rho](https://en.wikipedia.org/wiki/Pollard%27s_rho_algorithm
 
 Some sample uses of the classes are shown below:
 
-```
+```python
 import ciphers
 
 rsa = ciphers.RSA(15)
@@ -40,7 +40,7 @@ encrypt = elgamal.encrypt([key_B], [ciphertext], [mod], [base], [key_Pub])
 
 Another easy way to view the functionality included in the classes in to use the built-in test function.
 
-```
+```python
 ciphers.RSA(7).test(12345)
 ```
 ```
