@@ -2,7 +2,7 @@
 
 #### This repository is made up of custom cryptographic functions written as part of a course on cryptography. They were created with the intent of understanding the underlying logic, and should not be used for any real encryption/decryption.
 
-`ciphers.py` contains classes that implement both the [El Gamal](https://en.wikipedia.org/wiki/ElGamal_encryption) and [RSA](https://en.wikipedia.org/wiki/RSA_(cryptosystem)) ciphers. Each class has functions to initialize, encrypt, decrypt, and crack. Both take only one argument for initialization, the size (in digits) of the prime number that makes up the basis of the algorithm.
+`ciphers.py` contains classes that implement both the [El Gamal](https://en.wikipedia.org/wiki/ElGamal_encryption) and [RSA](https://en.wikipedia.org/wiki/RSA_(cryptosystem)) ciphers. Each class has functions to initialize, encrypt, decrypt, and crack. Both take one argument for initialization, the size (in digits) of the prime number that makes up the basis of the algorithm. Optionally, each can be initialized with the publically transmitted pieces of the key hardcoded (n and e for RSA, mod, base, and public key for ElGamal). This can be useful when solely encrypting or cracking using someone else's public key.
 
 For El Gamal, the [Baby-step Giant-step](https://en.wikipedia.org/wiki/Baby-step_giant-step) algorithm for finding discrete logarithms is used to crack the encryption.
 
