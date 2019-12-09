@@ -23,7 +23,6 @@ cracked = rsa.crack(ciphertext)
 # To use a public key different than what was created on initialization:
 cracked = rsa.crack([ciphertext], [n], [e])
 
-
 elgamal = ciphers.ElGamal(15)
 print('Alice\'s public key:')
 print(elgamal.mod, elgamal.base, elgamal.key_pub)
