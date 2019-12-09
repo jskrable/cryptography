@@ -13,8 +13,7 @@ from timeit import default_timer as timer
 
 class RSA:
 
-    def __init__(self, size=10):
-        # make these strong primes!!!!s
+    def __init__(self, size=10, n=None, e=None):
         self.__p = cp.prime_search(size, True)
         self.__q = cp.prime_search(size, True)
         if not (cp.miller_rabin(self.__p) or cp.miller_rabin(self.q)):
@@ -28,7 +27,7 @@ class RSA:
         self.e = e
 
 
-    def encrypt(self, message, key=None):
+    def encrypt(self, message, n=None, e=None):
         """
         function to encrypt a message, given a public key made up of
         a modulus and an exponent. raises the message to the exponent
@@ -39,7 +38,8 @@ class RSA:
         """
         # if type(message) is str:
         #     message = cp.str_to_int(message)
-        e, n = self.e, self.n if not key else key
+        e = self.e if not e else e
+        n = self.n if not n else n
         if message > n:
             raise Exception('Message larger than modular group. Cannot safely encrypt. Please provide larger size at class initialization.')
             return -1, -1
@@ -60,17 +60,19 @@ class RSA:
         return decrypted
 
 
-    def crack(self, message):
+    def crack(self, message, n=None, e=None):
         """
         function to crack RSA encryption using pollard's rho??
         get p and q by factoring n, calculate phi using that, get 
         d using that.
         """
-        p = cp.pollards_rho(self.n)
-        q = self.n // p
+        n = self.n if not n else n
+        e = self.e if not e else e
+        p = cp.pollards_rho(n)
+        q = n // p
         phi = (p-1) * (q-1)
-        d = phi + cp.ext_gcd(phi, self.e)[-1]
-        return cp.fast_exp(message, d, self.n)
+        d = phi + cp.ext_gcd(phi, e)[-1]
+        return cp.fast_exp(message, d, n)
 
 
     def test(self, message):
@@ -93,14 +95,14 @@ class RSA:
 
 class ElGamal:
 
-    def __init__(self, size=10):
-        self.mod = cp.prime_search(size, True)
-        if not cp.miller_rabin(self.mod, 30):
-            raise Exception('Modulus is not prime. Cannot safely encrypt.')
-            return -1
-        self.base = cp.primitive_root_search(self.mod)
+    def __init__(self, size=10, mod=None, base=None, key=None):
+        self.mod = cp.prime_search(size, True) if not mod else mod
+        # if not cp.miller_rabin(self.mod, 30):
+        #     raise Exception('Modulus is not prime. Cannot safely encrypt.')
+        #     return -1
+        self.base = cp.primitive_root_search(self.mod) if not base else base
         self.__key_A = cp.blum_blum_shub(20) % self.mod
-        self.key_pub = cp.fast_exp(self.base, self.__key_A, self.mod)
+        self.key_pub = cp.fast_exp(self.base, self.__key_A, self.mod) if not key else key
 
 
     def encrypt(self, message, mod=None, base=None, key=None):
@@ -140,7 +142,7 @@ class ElGamal:
         return decrypted
 
 
-    def crack(self, c1, c2):
+    def crack(self, c1, c2, mod=None, base=None, key=None):
         """
         function to crack el gamal encryption using baby step giant step. takes in
         the following publically transmitted information:
@@ -156,7 +158,9 @@ class ElGamal:
         note key_A is derived here by solving a discrete log, not using the class's 
         private key_A attribute Alice saved earlier.
         """
-
+        mod = self.mod if not mod else mod
+        base = self.base if not base else base
+        key = self.key_pub if not key else key
         # get Alice's private key by solving discrete log problem
         # runtime increases exponentially with larger keys
         key_A = cp.baby_step_giant_step(self.key_pub, self.base, self.mod)

@@ -285,13 +285,11 @@ def ext_gcd(m, n):
     Extended Euclidean algorithm. Returns a pair of integers such that xm + yn
     returns the smallest possible positive integer
     """
-    # clean implementation
     if m == 0:
         return n, 0, 1
     else:
         div, x, y = ext_gcd(n % m, m)
         return div, y - n // m * x, x
-    # TODO write a printout implementation for this??
 
 
 def phi(n):

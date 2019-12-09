@@ -8,6 +8,51 @@ For El Gamal, the [Baby-step Giant-step](https://en.wikipedia.org/wiki/Baby-step
 
 For RSA, [Pollard's Rho](https://en.wikipedia.org/wiki/Pollard%27s_rho_algorithm) factorization algorithm is used for cracking.
 
+Some sample uses of the classes are shown below:
+
+```
+import ciphers
+
+rsa = ciphers.RSA(15)
+print('Alice\'s public key:')
+print(rsa.n, rsa.e)
+ciphertext = rsa.encrypt(123456)
+decrypted = rsa.decrypt(ciphertext)
+cracked = rsa.crack(ciphertext)
+
+# To use a public key different than what was created on initialization:
+cracked = rsa.crack([ciphertext], [n], [e])
+
+
+elgamal = ciphers.ElGamal(15)
+print('Alice\'s public key:')
+print(elgamal.mod, elgamal.base, elgamal.key_pub)
+key_B, ciphertext = elgamal.encrypt(123456)
+decrypted = elgamal.decrypt(key_B, ciphertext)
+cracked = elgamal.crack(key_B, ciphertext)
+
+# Like above, to use a key other than what was created during initialization,
+# pass the values in to crack or encrypt
+
+cracked = elgamal.crack([key_B], [ciphertext], [mod], [base], [key_Pub])
+encrypt = elgamal.encrypt([key_B], [ciphertext], [mod], [base], [key_Pub])
+```
+
+Another easy way to view the functionality included in the classes in to use the built-in test function.
+
+```
+ciphers.RSA(7).test(12345)
+```
+```
+Modulus    : 9996966593909
+Exponent   : 1216367
+Message    : 12345
+Encrypted  : 7928205800298
+Decrypted  : 12345
+Cracked    : 12345
+Crack time : 3.718854550999822 seconds
+```
+
 All utilities and helper functions can be found in crypt_helpers.py
 
 Execute unit_tests.py script to run unit tests. Arguments are detailed below, and can also be accessed by appending `-h` to the script command.

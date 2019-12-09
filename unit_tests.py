@@ -109,7 +109,7 @@ class TestCiphers(unittest.TestCase):
 
     def test_RSA(self):
         for i in range(SIZE):
-            r = ciphers.RSA(6)
+            r = ciphers.RSA(7)
             message = cp.blum_blum_shub(6)
             self.assertEqual(message, r.decrypt(r.encrypt(message)))
             self.assertEqual(message, r.crack(r.encrypt(message)))
