@@ -158,7 +158,6 @@ def miller_rabin(n, k=30, safe=False):
     probablity that n is prime
     safe: if true, performs a secondary check to ensure n is a safe
     prime
-
     """
 
     # catch easy primes
@@ -221,7 +220,6 @@ def fast_exp(x, e, m, show=False, y=1):
     X is the number to raise
     E is the power to raise it to
     M is the modulus
-
     """
     if show:
         print(f'x = {x}  e = {e} y = {y}')
@@ -238,27 +236,6 @@ def fast_exp(x, e, m, show=False, y=1):
         e -= 1
         # print('ODD')
         return fast_exp(x, e, m, show, y)
-
-
-def exp(x, e, m, y=1):
-    """
-    Function allowing efficient exponentiation within a modular group.
-    X is the number to raise
-    E is the power to raise it to
-    M is the modulus
-
-    """
-    if e == 0:
-        return y
-    elif (e % 2 == 0):
-        x = (x**2) % m
-        e //= 2
-        return exp(x, e, m, y)
-    else:
-        y = (y*x) % m
-        e -= 1
-        return exp(x, e, m, y)
-
 
 
 def gcd(m, n, show=False):
@@ -279,7 +256,6 @@ def gcd(m, n, show=False):
         return gcd(n % m, m)
 
 
-
 def ext_gcd(m, n):
     """
     Extended Euclidean algorithm. Returns a pair of integers such that xm + yn
@@ -293,18 +269,19 @@ def ext_gcd(m, n):
 
 
 def phi(n):
+    """
+    Helper function to find the size of the group
+    """
     if miller_rabin(n):
         return n-1
     else:
         return len([x for x in range(1, n) if gcd(x, n) == 1])
 
 
-
 def eff_prime_factors(n):
     """
     function to find a set of all prime factors for any 
     given n. takes in an integer, returns a set.
-
     """
     factors = set()
 
@@ -323,35 +300,11 @@ def eff_prime_factors(n):
     return factors
 
 
-# def prime_check(n, d=2):
-
-#     while d < int(n**0.5)+1:
-#         if n % d == 0:
-#             return False
-#             n = n / d
-#         d += 1
-
-#     return True
-
-
-# # Non-efficient algorithm to find prime factors of n
-# def non_eff_prime_factors(n, d=2):
-
-#     while d < int(n**0.5):
-#         if n % d == 0:
-#             n = n / d
-#         d += 1
-
-#     non_eff_prime_factors(n, d)
-#     print(int(n))
-
-
 def pollards_rho(n, x=2, limit=5):
     """
     hitting recursion limit, refactor to 2 loops?
     prime init is helping...
     """
-
     if miller_rabin(n, 30):
         raise Exception('n is prime you fool.')
 
