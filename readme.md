@@ -62,7 +62,7 @@ $ ./unit_tests.py -h
 usage: unit_tests.py [-h] [-s [SIZE]] [-a [ALL]] [-b [BREAKERS]]
                      [-c [CIPHERS]] [-u [UTILITIES]]
 
-Solve traveling salesman problem using simulated annealing
+unit testing for ciphers.py and crypt_helpers.py
 
 optional arguments:
   -h, --help            show this help message and exit
